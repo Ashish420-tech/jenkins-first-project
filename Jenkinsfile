@@ -13,28 +13,34 @@ pipeline {
     stage('Setup Python') {
       steps {
         echo "Create venv and install deps"
-        // create venv
         bat 'python -m venv .venv'
-
-        // upgrade pip CORRECTLY
         bat '.venv\\Scripts\\python.exe -m pip install --upgrade pip'
-
-        // install requirements
         bat '.venv\\Scripts\\python.exe -m pip install -r requirements.txt'
       }
     }
 
-    stage('Run Tests') {
+    stage('Run Tests with Coverage') {
       steps {
-        echo "Running pytest"
-        bat '.venv\\Scripts\\python.exe -m pytest --junitxml=reports\\junit.xml'
+        echo "Running pytest with coverage"
+        // produce junit xml, coverage XML and HTML report
+        bat '''.venv\\Scripts\\python.exe -m pytest --junitxml=reports\\junit.xml --cov=src --cov-report=xml:reports\\coverage.xml --cov-report=html:reports\\coverage_html -q'''
       }
     }
 
-    stage('Archive & Publish') {
+    stage('Publish & Archive') {
       steps {
+        echo "Publishing JUnit, archiving artifacts, publishing coverage HTML"
+        // Ensure reports folder exists before Jenkins tries to process
+        bat 'if not exist reports mkdir reports'
+
+        // Publish junit results (Jenkins built-in)
         junit 'reports\\junit.xml'
-        archiveArtifacts artifacts: 'dist/**', fingerprint: true
+
+        // Archive coverage files and HTML so you can download them
+        archiveArtifacts artifacts: 'reports/**', fingerprint: true
+
+        // Publish HTML coverage using HTML Publisher plugin (configured below)
+        // HTML Publisher step will be run by plugin in post build — below is instructions to configure it in Jenkins UI
       }
     }
   }
