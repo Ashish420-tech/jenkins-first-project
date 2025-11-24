@@ -1,9 +1,8 @@
-// Jenkinsfile — Full Windows-friendly declarative pipeline for Python CI
-// - venv, pip install
-// - pytest with coverage (XML + HTML)
-// - publish JUnit results, publish HTML coverage (HTML Publisher plugin required)
-// - archive reports
-// - optional Docker build & push (controlled by parameters, uses credentialsId 'docker-hub-cred')
+// Jenkinsfile — Fixed (Windows-friendly)
+// - uses literal 'reports' paths so pytest writes coverage HTML where Jenkins expects it
+// - publishes JUnit, publishes HTML coverage (HTML Publisher plugin required)
+// - archives reports
+// - optional Docker build & push (parameters + credential 'docker-hub-cred')
 
 pipeline {
   agent any
@@ -100,9 +99,8 @@ pipeline {
       echo "Pipeline failed. Check console output: ${env.BUILD_URL}console"
     }
     always {
-      echo 'Pipeline finished — workspace retained (deleteDir() commented out)'
-      // If you want to clean workspace uncomment the line below
-      // deleteDir()
+      echo 'Pipeline finished — workspace retained'
+      // deleteDir() // uncomment if you want workspace cleaned each run
     }
   }
 }
