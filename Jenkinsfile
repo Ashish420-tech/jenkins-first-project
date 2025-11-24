@@ -38,7 +38,13 @@ pipeline {
     stage('Run Tests with Coverage') {
       steps {
         echo 'Running pytest with coverage (JUnit XML + coverage HTML)'
-        bat '''.venv\\Scripts\\python.exe -m pytest --junitxml=${REPORT_DIR}\\junit.xml --cov=src --cov-report=xml:${REPORT_DIR}\\coverage.xml --cov-report=html:${REPORT_DIR}\\coverage_html -q'''
+      stage('Run Tests with Coverage') {
+  steps {
+    echo 'Running pytest with coverage (JUnit XML + coverage HTML)'
+    bat """.venv\\Scripts\\python.exe -m pytest --junitxml=reports\\junit.xml --cov=src --cov-report=xml:reports\\coverage.xml --cov-report=html:reports\\coverage_html -q"""
+  }
+}
+  bat '''.venv\\Scripts\\python.exe -m pytest --junitxml=reports\\junit.xml --cov=src --cov-report=xml:${REPORT_DIR}\\coverage.xml --cov-report=html:${REPORT_DIR}\\coverage_html -q'''
       }
     }
 
