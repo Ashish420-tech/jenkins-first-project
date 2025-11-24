@@ -2,7 +2,6 @@ pipeline {
   agent any
 
   stages {
-
     stage('Checkout') {
       steps {
         checkout scm
@@ -21,26 +20,30 @@ pipeline {
 
     stage('Run Tests with Coverage') {
       steps {
-        echo "Running pytest with coverage"
-        // produce junit xml, coverage XML and HTML report
+        echo "Running pytest with coverage (JUnit XML + coverage HTML)"
         bat '''.venv\\Scripts\\python.exe -m pytest --junitxml=reports\\junit.xml --cov=src --cov-report=xml:reports\\coverage.xml --cov-report=html:reports\\coverage_html -q'''
       }
     }
 
     stage('Publish & Archive') {
       steps {
-        echo "Publishing JUnit, archiving artifacts, publishing coverage HTML"
-        // Ensure reports folder exists before Jenkins tries to process
+        echo "Publishing JUnit, publishing coverage HTML, and archiving reports"
+        // ensure reports folder exists
         bat 'if not exist reports mkdir reports'
 
-        // Publish junit results (Jenkins built-in)
+        // publish junit test results to Jenkins
         junit 'reports\\junit.xml'
 
-        // Archive coverage files and HTML so you can download them
-        archiveArtifacts artifacts: 'reports/**', fingerprint: true
+        // publish HTML coverage (requires HTML Publisher plugin)
+        publishHTML([allowMissing: false,
+                     alwaysLinkToLastBuild: true,
+                     keepAll: true,
+                     reportDir: 'reports/coverage_html',
+                     reportFiles: 'index.html',
+                     reportName: 'Coverage Report'])
 
-        // Publish HTML coverage using HTML Publisher plugin (configured below)
-        // HTML Publisher step will be run by plugin in post build — below is instructions to configure it in Jenkins UI
+        // archive reports for download
+        archiveArtifacts artifacts: 'reports/**', fingerprint: true
       }
     }
   }
