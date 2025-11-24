@@ -9,8 +9,8 @@ pipeline {
     }
     stage('Build') {
       steps {
-        echo "Simple build step (Linux)"
-        sh 'echo Hello from Jenkinsfile && ls -la'
+        echo "Simple build step (Window)"
+        bat 'echo Hello from Jenkinsfile && dir'
       }
     }
   }
